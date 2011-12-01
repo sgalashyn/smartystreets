@@ -2,22 +2,31 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
 
     /*
-     * Version 0.1 — Dec 1, 2011
+     * Version 0.2 — Dec 1, 2011
      * API docs: http://wiki.smartystreets.com/liveaddress_api_users_guide
      */
 
 
     /*
      * TODO:
-     * - Check compatibility with CF9 (CF8 wont be supported).
      * - Prepare usage examples and README.
      */
 
 
     variables.apikey = "";
+    variables.apiurl = "http://www.postbin.org/t357qt";
     variables.apiurl = "https://api.qualifiedaddress.com/street-address/";
     variables.useragent = "";
     variables.verbose = false;
+
+    // HTTP status codes by SS
+    variables.statuses = {
+        "200" = "Request completed successfully, inspect response body.",
+        "400" = "Malformed request – required fields missing from request.",
+        "401" = "Authentication failure – invalid credentials; check credentials and try again.",
+        "402" = "Unauthorized access; no active subscription can be found.",
+        "500" = "General service failure, retry request."
+    };
 
 
     /*
@@ -76,12 +85,24 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
     }
 
 
+    private string function getStatusDefinition(required string code) hint="Get definition for status code" {
+
+        if (StructKeyExists(variables.statuses, arguments.code)) {
+            return variables.statuses[arguments.code];
+        }
+        else {
+            return "Unknown status code (#local.code#)";
+        }
+
+    }
+
+
 
     /*
      * @street The input street address of the request
      *
      */
-    private struct function invoke(
+    public any function invoke(
         required string street
     )
     hint="Perform request to the API and handle response" {
@@ -95,34 +116,54 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
         try {
 
 
-            // communicate with API
+            // send a request to API (token must be in URL)
 
-            http url=getApiUrl() method="post" useragent=getUserAgent() result="local.result" {
+            local.service = new http(
+                url = "#getApiUrl()#?auth-token=#URLEncodedFormat(getApiKey())#",
+                method = "post",
+                useragent = getUserAgent()
+            );
 
-                httpparam type="formfield" name="auth-key" value=getApiKey();
-
-                for (local.key in arguments) {
-                    httpparam type="formfield" name=local.key value=arguments[local.key];
-                }
-
+            for (local.key in arguments) {
+                local.service.addParam(type="formfield", name=LCase(local.key), value=arguments[local.key]);
             }
+
+            local.result = local.service.send().getPrefix();
 
             if (getVerbose()) {
                 local.output.result = local.result;
             }
 
 
+            // check if request is handled
+
+            if (local.result.responseheader.status_code NEQ 200) {
+                throw(message=getStatusDefinition(local.result.responseheader.status_code));
+            }
+
+
+            // try to parse the response
+
+            if (StructKeyExists(local.result, "filecontent") AND isJSON(local.result.filecontent)) {
+                local.output.fault = false;
+                local.output.data = DeserializeJSON(local.result.filecontent);
+            }
+            else if (StructKeyExists(local.result, "errordetail")) {
+                throw(message="API communication failure. #local.result.errordetail#");
+            }
+            else {
+                throw(message="API communication failure, or invalid response returned.");
+            }
+
 
         }
-        catch (any local.exception) {
-
-            rethrow;
+        catch (any exception) {
 
             local.output.fault = true;
-            local.output.data = local.exception.Message;
+            local.output.data = exception.Message;
 
             if (getVerbose()) {
-                local.output.exception = local.exception;
+                local.output.exception = exception;
             }
 
         }
