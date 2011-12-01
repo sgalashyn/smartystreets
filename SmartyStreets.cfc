@@ -1,25 +1,20 @@
 component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
 
+
     /*
-     * Version 0.2 — Dec 1, 2011
+     * Version 1.0 — Dec 1, 2011
      * API docs: http://wiki.smartystreets.com/liveaddress_api_users_guide
      */
 
 
-    /*
-     * TODO:
-     * - Prepare usage examples and README.
-     */
-
-
     variables.apikey = "";
-    variables.apiurl = "http://www.postbin.org/t357qt";
     variables.apiurl = "https://api.qualifiedaddress.com/street-address/";
     variables.useragent = "";
     variables.verbose = false;
 
-    // HTTP status codes by SS
+
+    // HTTP status codes map
     variables.statuses = {
         "200" = "Request completed successfully, inspect response body.",
         "400" = "Malformed request – required fields missing from request.",
@@ -27,6 +22,7 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
         "402" = "Unauthorized access; no active subscription can be found.",
         "500" = "General service failure, retry request."
     };
+
 
 
     /*
@@ -99,13 +95,9 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
 
     /*
-     * @street The input street address of the request
-     *
+     * Required arguments are street AND either city/state OR zipcode OR city/zipcode OR lastline
      */
-    public any function invoke(
-        required string street
-    )
-    hint="Perform request to the API and handle response" {
+    public any function invoke() hint="Perform request to the API and handle response" {
 
         var local = {};
 
@@ -114,6 +106,36 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
 
         try {
+
+
+            // make simple validation of arguments
+
+            if (getApiKey() EQ "") {
+                throw(message="API key not set.");
+            }
+
+            param name="arguments.street" default="";
+            param name="arguments.city" default="";
+            param name="arguments.state" default="";
+            param name="arguments.zipcode" default="";
+            param name="arguments.lastline" default="";
+
+            if (arguments.street EQ "") {
+                throw(message="You must supply street address.");
+            }
+
+            if (arguments.city NEQ "" AND arguments.state NEQ "") {
+                // OK
+            }
+            else if (arguments.zipcode NEQ "") {
+                // OK
+            }
+            else if (arguments.lastline NEQ "") {
+                // OK
+            }
+            else {
+                throw(message="You must supply street AND city/state OR zipcode OR city/zipcode OR lastline.");
+            }
 
 
             // send a request to API (token must be in URL)
@@ -138,7 +160,7 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
             // check if request is handled
 
             if (local.result.responseheader.status_code NEQ 200) {
-                throw(message=getStatusDefinition(local.result.responseheader.status_code));
+                throw(message=getStatusDefinition(local.result.responseheader.status_code), detail=local.result.responseheader.explanation);
             }
 
 
@@ -152,7 +174,7 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
                 throw(message="API communication failure. #local.result.errordetail#");
             }
             else {
-                throw(message="API communication failure, or invalid response returned.");
+                throw(message="API communication failure, or invalid (not JSON) response returned.");
             }
 
 
@@ -161,6 +183,10 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
             local.output.fault = true;
             local.output.data = exception.Message;
+
+            if (exception.Detail NEQ "") {
+                local.output.data &= " " & exception.Detail;
+            }
 
             if (getVerbose()) {
                 local.output.exception = exception;
