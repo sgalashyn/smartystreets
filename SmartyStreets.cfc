@@ -4,6 +4,7 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
     /*
      * Version 1.0 — Dec 1, 2011
+     * Home page: https://github.com/sgalashyn/smartystreets
      * API docs: http://wiki.smartystreets.com/liveaddress_api_users_guide
      */
 
@@ -32,8 +33,8 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
      */
     public any function init(
         required string apikey,
-        string useragent = server.ColdFusion.ProductName,
-        boolean verbose = false
+        boolean verbose = false,
+        string useragent = server.ColdFusion.ProductName
     )
     hint="Component initialization" {
 
@@ -46,52 +47,10 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
     }
 
 
-    public void function setApiKey(required string apikey) hint="Set current API auth key setting" {
-        variables.apikey = arguments.apikey;
-    }
 
-
-    public string function getApiKey() hint="Get current API auth key setting" {
-        return variables.apikey;
-    }
-
-
-    public void function setUserAgent(required string useragent) hint="Set current useragent setting" {
-        variables.useragent = arguments.useragent;
-    }
-
-
-    public string function getUserAgent() hint="Get current useragent setting" {
-        return variables.useragent;
-    }
-
-
-    public string function getApiUrl() hint="Get current API URL" {
-        return variables.apiurl;
-    }
-
-
-    public void function setVerbose(required boolean verbose) hint="Set current verbose setting" {
-        variables.verbose = arguments.verbose;
-    }
-
-
-    public boolean function getVerbose() hint="Get current verbose setting" {
-        return variables.verbose;
-    }
-
-
-    private string function getStatusDefinition(required string code) hint="Get definition for status code" {
-
-        if (StructKeyExists(variables.statuses, arguments.code)) {
-            return variables.statuses[arguments.code];
-        }
-        else {
-            return "Unknown status code (#local.code#)";
-        }
-
-    }
-
+    /*
+     * INTERACTION WITH API
+     */
 
 
     /*
@@ -197,6 +156,59 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
 
         return local.output;
 
+
+    }
+
+
+
+    /*
+     * HELPERS
+     */
+
+
+    public void function setApiKey(required string apikey) hint="Set current API auth key setting" {
+        variables.apikey = arguments.apikey;
+    }
+
+
+    public string function getApiKey() hint="Get current API auth key setting" {
+        return variables.apikey;
+    }
+
+
+    public void function setUserAgent(required string useragent) hint="Set current useragent setting" {
+        variables.useragent = arguments.useragent;
+    }
+
+
+    public string function getUserAgent() hint="Get current useragent setting" {
+        return variables.useragent;
+    }
+
+
+    public string function getApiUrl() hint="Get current API URL" {
+        return variables.apiurl;
+    }
+
+
+    public void function setVerbose(required boolean verbose) hint="Set current verbose setting" {
+        variables.verbose = arguments.verbose;
+    }
+
+
+    public boolean function getVerbose() hint="Get current verbose setting" {
+        return variables.verbose;
+    }
+
+
+    private string function getStatusDefinition(required string code) hint="Get definition for status code" {
+
+        if (StructKeyExists(variables.statuses, arguments.code)) {
+            return variables.statuses[arguments.code];
+        }
+        else {
+            return "Unknown status code (#local.code#)";
+        }
 
     }
 
