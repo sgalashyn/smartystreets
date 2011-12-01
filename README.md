@@ -33,46 +33,38 @@ There are few other helper (getter/setter) methods, please see component code fo
 
 Step by step use with verbose output:
 
-```cfml
-
-ws = CreateObject("SmartyStreets").init(apikey = "YourAuthenticationToken", verbose = true);
-
-params = {
-    street = "1600 Amphitheatre Parkway",
-    zipcode = "94043",
-    city = "Mountain View",
-    state = "CA"
-};
-
-result = ws.invoke(argumentCollection = params);
-
-if (result.fault) {
-    WriteOutput("Something went wrong: " & result.data);
-    WriteDump(var=result.exception, label="Exception");
-}
-else {
-    WriteDump(var=result.data, label="Success");
-}
-
-```
+    ws = CreateObject("SmartyStreets").init(apikey = "YourAuthenticationToken", verbose = true);
+    
+    params = {
+        street = "1600 Amphitheatre Parkway",
+        zipcode = "94043",
+        city = "Mountain View",
+        state = "CA"
+    };
+    
+    result = ws.invoke(argumentCollection = params);
+    
+    if (result.fault) {
+        WriteOutput("Something went wrong: " & result.data);
+        WriteDump(var=result.exception, label="Exception");
+    }
+    else {
+        WriteDump(var=result.data, label="Success");
+    }
     
 Compact format:
 
-```cfml
-
-result = CreateObject("SmartyStreets").init("YourAuthenticationToken").invoke(
-    street = "1600 Amphitheatre Parkway",
-    zipcode = "94043"
-);
-
-if (result.fault) {
-    WriteOutput("Something went wrong: " & result.data);
-}
-else {
-    WriteDump(var=result.data, label="Success");
-}
-
-```
+    result = CreateObject("SmartyStreets").init("YourAuthenticationToken").invoke(
+        street = "1600 Amphitheatre Parkway",
+        zipcode = "94043"
+    );
+    
+    if (result.fault) {
+        WriteOutput("Something went wrong: " & result.data);
+    }
+    else {
+        WriteDump(var=result.data, label="Success");
+    }
 
 ## License
 
