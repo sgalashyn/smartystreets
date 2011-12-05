@@ -33,38 +33,42 @@ There are few other helper (getter/setter) methods, please see component code fo
 
 Step by step use with verbose output:
 
-    ws = CreateObject("SmartyStreets").init(apikey = "YourAuthenticationToken", verbose = true);
-    
-    params = {
-        street = "1600 Amphitheatre Parkway",
-        zipcode = "94043",
-        city = "Mountain View",
-        state = "CA"
-    };
-    
-    result = ws.invoke(argumentCollection = params);
-    
-    if (result.fault) {
-        WriteOutput("Something went wrong: " & result.data);
-        WriteDump(var=result.exception, label="Exception");
-    }
-    else {
-        WriteDump(var=result.data, label="Success");
-    }
+```cfm
+ws = CreateObject("SmartyStreets").init(apikey = "YourAuthenticationToken", verbose = true);
+
+params = {
+    street = "1600 Amphitheatre Parkway",
+    zipcode = "94043",
+    city = "Mountain View",
+    state = "CA"
+};
+
+result = ws.invoke(argumentCollection = params);
+
+if (result.fault) {
+    WriteOutput("Something went wrong: " & result.data);
+    WriteDump(var=result.exception, label="Exception");
+}
+else {
+    WriteDump(var=result.data, label="Success");
+}
+```
     
 Compact format:
 
-    result = CreateObject("SmartyStreets").init("YourAuthenticationToken").invoke(
-        street = "1600 Amphitheatre Parkway",
-        zipcode = "94043"
-    );
-    
-    if (result.fault) {
-        WriteOutput("Something went wrong: " & result.data);
-    }
-    else {
-        WriteDump(var=result.data, label="Success");
-    }
+```cfm
+result = CreateObject("SmartyStreets").init("YourAuthenticationToken").invoke(
+    street = "1600 Amphitheatre Parkway",
+    zipcode = "94043"
+);
+
+if (result.fault) {
+    WriteOutput("Something went wrong: " & result.data);
+}
+else {
+    WriteDump(var=result.data, label="Success");
+}
+```
 
 ## License
 
