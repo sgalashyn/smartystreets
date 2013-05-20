@@ -58,10 +58,8 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
      */
     public any function invoke() hint="Perform request to the API and handle response" {
 
-        var local = {};
 
-
-        local.output = {};
+        var local = {output = {}};
 
 
         try {
@@ -97,7 +95,7 @@ component displayname="SmartyStreets" hint="LiveAddress API v2.3.1 wrapper" {
             }
 
 
-            // send a request to API (token must be in URL)
+            // send a request to the API (token must be in URL)
 
             local.service = new http(
                 url = "#getApiUrl()#?auth-token=#URLEncodedFormat(getApiKey())#",
